@@ -14,7 +14,7 @@ import sys
 import threading
 import time
 
-import irssi_post
+import notify  # https://github.com/jheidel/notify
 
 
 LOG_FILE = '/var/log/cronwrap'
@@ -71,7 +71,7 @@ def run(argv):
   if exit_code != 0:
     with open(log_file, 'r') as f:
       tail = f.readlines()[-10:]
-    irssi_post.notify('Cron %s completed with status %s. Might want to check on that.'
+    notify.notify('cron', 'Cron %s completed with status %s. Might want to check on that.'
         '\nLog tail:\n%s' % (exec_name, exit_code, ''.join(tail)))
 
   if not logged_data.is_set():
