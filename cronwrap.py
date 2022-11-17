@@ -70,8 +70,8 @@ def run(argv):
 
   if exit_code != 0:
     with open(log_file, 'r') as f:
-      tail = f.readlines()[-10:]
-    text = ''.join(tail)[:1024]
+      tail = f.readlines()[-20:]
+    text = ''.join(tail)[-4096:]
     notify.notify('cron', 'Cron %s completed with status %s. Might want to check on that.'
         '\nLog tail:\n%s' % (exec_name, exit_code, text))
 
