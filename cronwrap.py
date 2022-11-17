@@ -45,24 +45,25 @@ def run(argv):
   fh.setFormatter(fmt)
   proc_logger.addHandler(fh)
 
-  proc_logger.debug('Starting cron "%s" with args %s' % (exec_name, argv))
+  proc_logger.debug('Starting cron "%s" with args %s logging to %s' % (exec_name, argv, log_file))
   start = time.time()
   logged_data = threading.Event()
 
   def consume(pipe, target):
-    with pipe:
-      for line in iter(pipe.readline, b''): #NOTE: workaround read-ahead bug
-        logged_data.set()
-        target(line.strip())
+    for line in pipe:
+      logged_data.set()
+      target(line.strip())
 
-  proc = subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+  proc = subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
   threads = [
-      threading.Thread(target=consume, args=[proc.stdout, proc_logger.info]),
-      threading.Thread(target=consume, args=[proc.stderr, proc_logger.error])
+      threading.Thread(target=consume, args=(proc.stdout, proc_logger.info,)),
+      threading.Thread(target=consume, args=(proc.stderr, proc_logger.error,))
   ]
-  map(lambda x: x.start(), threads)
+  for t in threads:
+      t.start()
   exit_code = proc.wait()
-  map(lambda x: x.join(), threads)
+  for t in threads:
+      t.join()
 
   proc_logger.debug('Cron "%s" exit %s after %.2f sec' % (
       exec_name, exit_code, time.time() - start))
