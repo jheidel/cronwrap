@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Wraps a process with logging basic STDOUT / STDERR logging and failure
 # notification via irssi_notifier (google cloud messaging)
@@ -71,8 +71,9 @@ def run(argv):
   if exit_code != 0:
     with open(log_file, 'r') as f:
       tail = f.readlines()[-10:]
+    text = ''.join(tail)[:1024]
     notify.notify('cron', 'Cron %s completed with status %s. Might want to check on that.'
-        '\nLog tail:\n%s' % (exec_name, exit_code, ''.join(tail)))
+        '\nLog tail:\n%s' % (exec_name, exit_code, text))
 
   if not logged_data.is_set():
     logging.info('Cron wrote no data.')
